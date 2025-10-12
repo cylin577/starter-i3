@@ -1,0 +1,89 @@
+set $mod Mod4
+
+font pango:JetBrains Mono 10
+
+# Wallpaper
+exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg
+
+# Picom 
+exec_always --no-startup-id picom --config ~/.config/picom.conf &
+
+# Applets
+#exec --no-startup-id bash ~/.config/i3/autostart.sh # Uncomment this line if nm-applet, blueman-applet, pasystray are all present on your machine
+
+# Fcitx5
+#exec --no-startup-id fcitx5 # Uncomment this line if you have fcitx5 installed and wish to use it
+
+# Gaps for aesthetics
+gaps inner 10
+gaps outer 5
+
+# Status bar (simple + clean)
+bar {
+    font pango:JetBrains Mono 10
+    status_command i3status
+    position top
+    separator_symbol "|"
+    colors {
+        background #33312c
+        statusline #ffffff
+        focused_workspace #562f69 #993dc4 #1e1e2e
+        inactive_workspace #313244 #472a54 #cdd6f4
+    }
+}
+
+
+# Keybind START
+
+# Reload config (no restart)
+bindsym $mod+Shift+c reload
+
+# Restart i3 inplace
+bindsym $mod+Shift+r restart
+
+# Move windows
+bindsym $mod+Shift+j move left
+bindsym $mod+Shift+k move down
+bindsym $mod+Shift+i move up
+bindsym $mod+Shift+l move right
+
+# Scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+# Promote scratchpad window to tiling on current workspace
+bindsym $mod+Shift+p [title=".*"] scratchpad show, floating disable
+
+# Close a window
+bindsym $mod+Shift+q kill
+
+# Move focus
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# Workspaces
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+
+# Rofi
+bindsym $mod+d exec rofi -show drun -theme Arc-Dark
+bindsym $mod+r exec rofi -show run -theme Arc-Dark
+
+# Launch terminal
+bindsym $mod+Return exec alacritty
+
+# Exit prompt
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3?' -b 'Yes' 'i3-msg exit'"
+
+# Floating
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+Ctrl+h resize shrink width 10 px
+bindsym $mod+Ctrl+j resize grow height 10 px
+bindsym $mod+Ctrl+k resize shrink height 10 px
+bindsym $mod+Ctrl+l resize grow width 10 px
+# Keybind END
+
+
