@@ -125,7 +125,7 @@ esac
 mkdir -p "$HOME/.config"
 [ -d "./i3" ] && check_source_exists "./i3" && backup_if_exists "$HOME/.config/i3" && cp -a ./i3 "$HOME/.config/" | tee -a "$LOGFILE"
 [ -f "./picom.conf" ] && check_source_exists "./picom.conf" && backup_if_exists "$HOME/.config/picom.conf" && cp -v ./picom.conf "$HOME/.config/picom.conf" | tee -a "$LOGFILE"
-[ -f "./i3/autostart.sh" ] && check_source_exists "./i3/autostart.sh" && mkdir -p "$HOME/.config/i3" && install -m 755 ./autostart.sh "$HOME/.config/i3/autostart.sh" 2>/dev/null || { cp -v ./autostart.sh "$HOME/.config/i3/autostart.sh"; chmod 755 "$HOME/.config/i3/autostart.sh"; }
+[ -f "./i3/autostart.sh" ] && check_source_exists "./i3/autostart.sh" && mkdir -p "$HOME/.config/i3" && install -m 755 ./i3/autostart.sh "$HOME/.config/i3/autostart.sh" 2>/dev/null || { cp -v ./i3/autostart.sh "$HOME/.config/i3/autostart.sh"; chmod 755 "$HOME/.config/i3/autostart.sh"; }
 [ "$DO_WALLPAPER" = true ] && [ -f "./wallpaper.jpg" ] && mkdir -p "$HOME/Pictures" && cp -v ./wallpaper.jpg "$HOME/Pictures/" | tee -a "$LOGFILE"
 
 ensure_xsession
