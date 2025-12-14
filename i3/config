@@ -9,28 +9,33 @@ exec_always --no-startup-id feh --bg-fill ~/Pictures/wallpaper.jpg
 exec_always --no-startup-id picom --config ~/.config/picom.conf &
 
 # Applets
-#exec --no-startup-id bash ~/.config/i3/autostart.sh # Uncomment this line if nm-applet, blueman-applet, pasystray are all present on your machine
+exec --no-startup-id bash ~/.config/i3/autostart.sh
 
 # Fcitx5
-#exec --no-startup-id fcitx5 # Uncomment this line if you have fcitx5 installed and wish to use it
+exec --no-startup-id fcitx5
+
+# Polybar
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 
 # Gaps for aesthetics
 gaps inner 10
 gaps outer 5
 
-# Status bar (simple + clean)
-bar {
-    font pango:JetBrains Mono 10
-    status_command i3status
-    position top
-    separator_symbol "|"
-    colors {
-        background #33312c
-        statusline #ffffff
-        focused_workspace #562f69 #993dc4 #1e1e2e
-        inactive_workspace #313244 #472a54 #cdd6f4
-    }
-}
+for_window [class=".*"] border pixel 0
+
+# Status bar (simple, clean, replaced by polybar)
+#bar {
+#    font pango:JetBrains Mono 10
+#    status_command i3status
+#    position top
+#    separator_symbol "|"
+#    colors {
+#        background #33312c
+#        statusline #ffffff
+#        focused_workspace #fff00d #fff00d #1e1e2e
+#        inactive_workspace #313244 #472a54 #cdd6f4
+#    }
+#}
 
 
 # Keybind START
@@ -70,7 +75,6 @@ bindsym $mod+4 workspace 4
 
 # Rofi
 bindsym $mod+d exec rofi -show drun -theme Arc-Dark
-bindsym $mod+r exec rofi -show run -theme Arc-Dark
 
 # Launch terminal
 bindsym $mod+Return exec alacritty
@@ -84,6 +88,20 @@ bindsym $mod+Ctrl+h resize shrink width 10 px
 bindsym $mod+Ctrl+j resize grow height 10 px
 bindsym $mod+Ctrl+k resize shrink height 10 px
 bindsym $mod+Ctrl+l resize grow width 10 px
+
+# System mode
+set $mode_system System: (l)ock, lo(g)out, (r)eboot, (s)hutdown, (p)erformance
+mode "$mode_system" {
+    bindsym l exec i3lock -B 3 -k --inside-color=00000000 --ring-color 472a54 --keyhl-color=993dc4 -c 00000000, mode "default"
+    bindsym e exec i3-msg exit, mode "default"
+    bindsym s exec systemctl poweroff, mode "default"
+    bindsym r exec systemctl reboot, mode "default"
+    bindsym p exec echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor, mode "default"
+    
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+Escape mode "$mode_system"
 # Keybind END
 
 
