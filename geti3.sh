@@ -63,14 +63,10 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOGFILE"; }
 err() { echo "ERROR: $*" >&2; log "ERROR: $*"; exit 1; }
 
 detect_package_manager() {
-  log "Entering detect_package_manager"
   AVAILABLE_PMS=()
   declare -g AVAILABLE_PMS
-  log "Checking for apt"
-  command -v apt >/dev/null 2>&1 && { log "apt found"; AVAILABLE_PMS+=("apt"); } || true
-  log "Checking for pacman"
-  command -v pacman >/dev/null 2>&1 && { log "pacman found"; AVAILABLE_PMS+=("pacman"); } || true
-  log "Exiting detect_package_manager"
+  command -v apt >/dev/null 2>&1 && AVAILABLE_PMS+=("apt") || true
+  command -v pacman >/dev/null 2>&1 && AVAILABLE_PMS+=("pacman") || true
 }
 
 check_source_exists() { [ -e "$1" ] || err "Required file/directory not found: $1"; }
@@ -111,11 +107,9 @@ log "Starting i3 installer for $TARGET_USER"
 echo "starter-i3 installation Logfile: $LOGFILE"
 
 start_sudo_keepalive
-log "After start_sudo_keepalive"
 trap stop_sudo_keepalive EXIT
-log "After trap setup"
+
 detect_package_manager
-log "After detect_package_manager"
 log "Available package managers: ${AVAILABLE_PMS[@]}"
 
 if [ ${#AVAILABLE_PMS[@]} -eq 0 ]; then
