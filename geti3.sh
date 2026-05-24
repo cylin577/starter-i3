@@ -140,10 +140,22 @@ if [ -n "${CHOSEN_PM:-}" ]; then
 fi
 
 mkdir -p "$TARGET_HOME/.config"
-[ -d "./i3" ] && check_source_exists "./i3" && backup_if_exists "$TARGET_HOME/.config/i3" && cp -a ./i3 "$TARGET_HOME/.config/" | tee -a "$LOGFILE" && chown -R "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/i3"
-[ -f "./picom.conf" ] && check_source_exists "./picom.conf" && backup_if_exists "$TARGET_HOME/.config/picom.conf" && cp -v ./picom.conf "$TARGET_HOME/.config/picom.conf" | tee -a "$LOGFILE" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/picom.conf"
-[ -d "./polybar" ] && check_source_exists "./polybar" && backup_if_exists "$TARGET_HOME/.config/polybar" && cp -a ./polybar "$TARGET_HOME/.config/" | tee -a "$LOGFILE" && chown -R "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/polybar"
-[ -f "./i3/autostart.sh" ] && check_source_exists "./i3/autostart.sh" && mkdir -p "$TARGET_HOME/.config/i3" && cp -v ./i3/autostart.sh "$TARGET_HOME/.config/i3/autostart.sh" && chmod 755 "$TARGET_HOME/.config/i3/autostart.sh" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/i3/autostart.sh"
+
+if [ -f "./configs.tar.gz" ]; then
+  log "Extracting configuration archive..."
+  # Backup existing configs before extracting
+  for dir in i3 polybar; do
+    backup_if_exists "$TARGET_HOME/.config/$dir"
+  done
+  backup_if_exists "$TARGET_HOME/.config/picom.conf"
+
+  tar -xzf ./configs.tar.gz -C "$TARGET_HOME/.config/" | tee -a "$LOGFILE"
+  chown -R "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/i3" "$TARGET_HOME/.config/polybar" "$TARGET_HOME/.config/picom.conf"
+  chmod +x "$TARGET_HOME/.config/i3/autostart.sh" "$TARGET_HOME/.config/polybar/launch.sh"
+  log "Configurations extracted and permissions set."
+else
+  err "configs.tar.gz not found. Please ensure the archive exists."
+fi
 [ "$DO_WALLPAPER" = true ] && [ -f "./wallpaper.jpg" ] && mkdir -p "$TARGET_HOME/Pictures" && cp -v ./wallpaper.jpg "$TARGET_HOME/Pictures/" | tee -a "$LOGFILE" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/Pictures/wallpaper.jpg"
 
 ensure_xsession

@@ -21,7 +21,7 @@ The project uses a shell script, `geti3.sh`, to automate the installation and co
 1.  **Detects available package managers** (`apt` or `pacman`). If both are found, it will prompt the user to choose.
 2.  **Installs necessary packages** using the appropriate package manager (`apt` or `pacman`).
 3.  **Backs up existing configuration files** in `~/.config/i3` and `~/.config/picom.conf`.
-5.  **Copies the new configuration files** to `~/.config/` (including i3, picom, and polybar configurations).
+4.  **Extracts the configuration archive** `configs.tar.gz` to `~/.config/` (including i3, picom, and polybar configurations).
 5.  **Sets the wallpaper** by copying `wallpaper.jpg` to `~/Pictures/`.
 6.  **Ensures `~/.xinitrc` and `~/.xsession` are present** to start i3 correctly.
 
