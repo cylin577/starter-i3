@@ -4,7 +4,9 @@ set -euo pipefail
 ### -------------------------
 ### Configuration / Defaults
 ### -------------------------
-LOGFILE="${HOME}/.starter-i3-$(date +%Y%m%d%H%M%S).log"
+TARGET_USER="${SUDO_USER:-$USER}"
+TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
+LOGFILE="${TARGET_HOME}/.starter-i3-$(date +%Y%m%d%H%M%S).log"
 BACKUP_SUFFIX="$(date +%Y%m%d-%H%M%S)"
 KEEP_SUDO_PID=""
 NONINTERACTIVE=false
@@ -75,26 +77,18 @@ check_source_exists() { [ -e "$1" ] || err "Required file/directory not found: $
 backup_if_exists() { [ -e "$1" ] && mv -v "$1" "$1.backup.$BACKUP_SUFFIX" | tee -a "$LOGFILE"; }
 
 start_sudo_keepalive() {
-  if sudo -n true 2>/dev/null; then
-    log "sudo already available, skipping keepalive"
-    return 0
-  fi
-  sudo -v || err "sudo authentication failed"
-  ( while true; do sudo -n true >/dev/null 2>&1 || exit 0; sleep 60; done ) &
-  KEEP_SUDO_PID=$!
-  log "Started sudo keepalive (pid=$KEEP_SUDO_PID)"
+  log "Skipping sudo keepalive (background processes forbidden)"
 }
 stop_sudo_keepalive() {
-  [ -n "${KEEP_SUDO_PID:-}" ] && kill -0 "$KEEP_SUDO_PID" 2>/dev/null && kill "$KEEP_SUDO_PID" 2>/dev/null || true
-  [ -n "${KEEP_SUDO_PID:-}" ] && log "Stopped sudo keepalive"
+  :
 }
 
 install_debian_pkgs() { sudo apt update | tee -a "$LOGFILE"; sudo apt install -y "${PKGS_DEBIAN[@]}" | tee -a "$LOGFILE"; }
 install_arch_pkgs() { sudo pacman -Syu --noconfirm | tee -a "$LOGFILE"; sudo pacman -S --noconfirm "${PKGS_ARCH[@]}" | tee -a "$LOGFILE"; }
 
 ensure_xsession() {
-  [ ! -f "$HOME/.xinitrc" ] && echo -e "exec i3" > "$HOME/.xinitrc" && chmod 644 "$HOME/.xinitrc" && log "Created ~/.xinitrc"
-  [ ! -f "$HOME/.xsession" ] && echo -e "#!/bin/sh\nexec i3" > "$HOME/.xsession" && chmod +x "$HOME/.xsession" && log "Created ~/.xsession"
+  [ ! -f "$TARGET_HOME/.xinitrc" ] && echo -e "exec i3" > "$TARGET_HOME/.xinitrc" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.xinitrc" && chmod 644 "$TARGET_HOME/.xinitrc" && log "Created ~/.xinitrc"
+  [ ! -f "$TARGET_HOME/.xsession" ] && echo -e "#!/bin/sh\nexec i3" > "$TARGET_HOME/.xsession" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.xsession" && chmod +x "$TARGET_HOME/.xsession" && log "Created ~/.xsession"
 }
 
 ### -------------------------
@@ -113,7 +107,7 @@ done
 ### -------------------------
 ### Main
 ### -------------------------
-log "Starting i3 installer"
+log "Starting i3 installer for $TARGET_USER"
 echo "starter-i3 installation Logfile: $LOGFILE"
 
 start_sudo_keepalive
@@ -151,12 +145,12 @@ if [ -n "${CHOSEN_PM:-}" ]; then
   fi
 fi
 
-mkdir -p "$HOME/.config"
-[ -d "./i3" ] && check_source_exists "./i3" && backup_if_exists "$HOME/.config/i3" && cp -a ./i3 "$HOME/.config/" | tee -a "$LOGFILE"
-[ -f "./picom.conf" ] && check_source_exists "./picom.conf" && backup_if_exists "$HOME/.config/picom.conf" && cp -v ./picom.conf "$HOME/.config/picom.conf" | tee -a "$LOGFILE"
-[ -d "./polybar" ] && check_source_exists "./polybar" && backup_if_exists "$HOME/.config/polybar" && cp -a ./polybar "$HOME/.config/" | tee -a "$LOGFILE"
-[ -f "./i3/autostart.sh" ] && check_source_exists "./i3/autostart.sh" && mkdir -p "$HOME/.config/i3" && install -m 755 ./i3/autostart.sh "$HOME/.config/i3/autostart.sh" 2>/dev/null || { cp -v ./i3/autostart.sh "$HOME/.config/i3/autostart.sh"; chmod 755 "$HOME/.config/i3/autostart.sh"; }
-[ "$DO_WALLPAPER" = true ] && [ -f "./wallpaper.jpg" ] && mkdir -p "$HOME/Pictures" && cp -v ./wallpaper.jpg "$HOME/Pictures/" | tee -a "$LOGFILE"
+mkdir -p "$TARGET_HOME/.config"
+[ -d "./i3" ] && check_source_exists "./i3" && backup_if_exists "$TARGET_HOME/.config/i3" && cp -a ./i3 "$TARGET_HOME/.config/" | tee -a "$LOGFILE" && chown -R "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/i3"
+[ -f "./picom.conf" ] && check_source_exists "./picom.conf" && backup_if_exists "$TARGET_HOME/.config/picom.conf" && cp -v ./picom.conf "$TARGET_HOME/.config/picom.conf" | tee -a "$LOGFILE" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/picom.conf"
+[ -d "./polybar" ] && check_source_exists "./polybar" && backup_if_exists "$TARGET_HOME/.config/polybar" && cp -a ./polybar "$TARGET_HOME/.config/" | tee -a "$LOGFILE" && chown -R "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/polybar"
+[ -f "./i3/autostart.sh" ] && check_source_exists "./i3/autostart.sh" && mkdir -p "$TARGET_HOME/.config/i3" && cp -v ./i3/autostart.sh "$TARGET_HOME/.config/i3/autostart.sh" && chmod 755 "$TARGET_HOME/.config/i3/autostart.sh" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/.config/i3/autostart.sh"
+[ "$DO_WALLPAPER" = true ] && [ -f "./wallpaper.jpg" ] && mkdir -p "$TARGET_HOME/Pictures" && cp -v ./wallpaper.jpg "$TARGET_HOME/Pictures/" | tee -a "$LOGFILE" && chown "$TARGET_USER:$TARGET_USER" "$TARGET_HOME/Pictures/wallpaper.jpg"
 
 ensure_xsession
 
@@ -169,10 +163,10 @@ fi
 echo
 log "Installation finished. Summary:"
 echo "  - Logfile: $LOGFILE"
-echo "  - i3 config: ~/.config/i3"
-echo "  - picom.conf: ~/.config/picom.conf"
-echo "  - polybar config: ~/.config/polybar"
-echo "  - Wallpaper: ~/Pictures/wallpaper.jpg"
+echo "  - i3 config: $TARGET_HOME/.config/i3"
+echo "  - picom.conf: $TARGET_HOME/.config/picom.conf"
+echo "  - polybar config: $TARGET_HOME/.config/polybar"
+echo "  - Wallpaper: $TARGET_HOME/Pictures/wallpaper.jpg"
 echo
 echo "Start i3:"
 echo "  - Use your display manager and select 'i3', or"
