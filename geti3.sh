@@ -61,7 +61,7 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOGFILE"; }
 err() { echo "ERROR: $*" >&2; log "ERROR: $*"; exit 1; }
 
 detect_package_manager() {
-  AVAILABLE_PMS=()
+  declare -g AVAILABLE_PMS=()
   command -v apt >/dev/null 2>&1 && AVAILABLE_PMS+=("apt")
   command -v pacman >/dev/null 2>&1 && AVAILABLE_PMS+=("pacman")
 }
