@@ -93,7 +93,7 @@ bindsym $mod+Ctrl+l resize grow width 10 px
 set $mode_system System: (l)ock, lo(g)out, (r)eboot, (s)hutdown, (p)erformance
 mode "$mode_system" {
     bindsym l exec i3lock -B 3 -k --inside-color=00000000 --ring-color 472a54 --keyhl-color=993dc4 -c 00000000, mode "default"
-    bindsym e exec i3-msg exit, mode "default"
+    bindsym g exec i3-msg exit, mode "default"
     bindsym s exec systemctl poweroff, mode "default"
     bindsym r exec systemctl reboot, mode "default"
     bindsym p exec echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor, mode "default"
