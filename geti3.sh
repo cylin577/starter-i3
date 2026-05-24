@@ -12,7 +12,7 @@ DO_APPEARANCE=true
 DO_WALLPAPER=true
 
 # Global variables
-declare -g AVAILABLE_PMS=()
+AVAILABLE_PMS=()
 
 # Package lists
 PKGS_DEBIAN=(
@@ -61,9 +61,14 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOGFILE"; }
 err() { echo "ERROR: $*" >&2; log "ERROR: $*"; exit 1; }
 
 detect_package_manager() {
-  declare -g AVAILABLE_PMS=()
-  command -v apt >/dev/null 2>&1 && AVAILABLE_PMS+=("apt")
-  command -v pacman >/dev/null 2>&1 && AVAILABLE_PMS+=("pacman")
+  log "Entering detect_package_manager"
+  AVAILABLE_PMS=()
+  declare -g AVAILABLE_PMS
+  log "Checking for apt"
+  command -v apt >/dev/null 2>&1 && { log "apt found"; AVAILABLE_PMS+=("apt"); } || true
+  log "Checking for pacman"
+  command -v pacman >/dev/null 2>&1 && { log "pacman found"; AVAILABLE_PMS+=("pacman"); } || true
+  log "Exiting detect_package_manager"
 }
 
 check_source_exists() { [ -e "$1" ] || err "Required file/directory not found: $1"; }
