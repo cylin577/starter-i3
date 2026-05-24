@@ -112,9 +112,11 @@ log "Starting i3 installer"
 echo "starter-i3 installation Logfile: $LOGFILE"
 
 start_sudo_keepalive
+log "After start_sudo_keepalive"
 trap stop_sudo_keepalive EXIT
-
+log "After trap setup"
 detect_package_manager
+log "After detect_package_manager"
 log "Available package managers: ${AVAILABLE_PMS[@]}"
 
 if [ ${#AVAILABLE_PMS[@]} -eq 0 ]; then
