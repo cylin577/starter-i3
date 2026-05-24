@@ -11,6 +11,9 @@ NONINTERACTIVE=false
 DO_APPEARANCE=true
 DO_WALLPAPER=true
 
+# Global variables
+declare -g AVAILABLE_PMS=()
+
 # Package lists
 PKGS_DEBIAN=(
   i3
