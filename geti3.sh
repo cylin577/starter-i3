@@ -70,14 +70,18 @@ check_source_exists() { [ -e "$1" ] || err "Required file/directory not found: $
 backup_if_exists() { [ -e "$1" ] && mv -v "$1" "$1.backup.$BACKUP_SUFFIX" | tee -a "$LOGFILE"; }
 
 start_sudo_keepalive() {
+  if sudo -n true 2>/dev/null; then
+    log "sudo already available, skipping keepalive"
+    return 0
+  fi
   sudo -v || err "sudo authentication failed"
   ( while true; do sudo -n true >/dev/null 2>&1 || exit 0; sleep 60; done ) &
   KEEP_SUDO_PID=$!
   log "Started sudo keepalive (pid=$KEEP_SUDO_PID)"
 }
 stop_sudo_keepalive() {
-  [ -n "${KEEP_SUDO_PID:-}" ] && kill -0 "$KEEP_SUDO_PID" 2>/dev/null && kill "$KEEP_SUDO_PID" || true
-  log "Stopped sudo keepalive"
+  [ -n "${KEEP_SUDO_PID:-}" ] && kill -0 "$KEEP_SUDO_PID" 2>/dev/null && kill "$KEEP_SUDO_PID" 2>/dev/null || true
+  [ -n "${KEEP_SUDO_PID:-}" ] && log "Stopped sudo keepalive"
 }
 
 install_debian_pkgs() { sudo apt update | tee -a "$LOGFILE"; sudo apt install -y "${PKGS_DEBIAN[@]}" | tee -a "$LOGFILE"; }
